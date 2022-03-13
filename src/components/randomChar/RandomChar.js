@@ -1,5 +1,5 @@
-import { Component } from 'react/cjs/react.production.min';
-import MarvelService from '../../services/MarvelService';
+import { useState, useEffect} from "react";
+import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 
@@ -8,95 +8,58 @@ import './randomChar.scss';
 
 import mjolnir from '../../resources/img/mjolnir.png';
 
-class RandomChar extends Component{
+const RandomChar = () =>{
+
+    const [char, setChar] = useState({});
+    
+    const {loading, error, getCharater, clearError} = useMarvelService();
+
+    useEffect(()=>{
+        updateChar();
+    },[]);
+
+    
 
 
-    constructor(props){
-        super(props);
-        console.log("construct");
-        this.state = {
-            char: {},
-            loading: true,
-            error: false
-        }
+
+    const onCharLoaded = (char) =>{
+        setChar(char);
+    }
+
+
+    const updateChar = () => {
+        clearError();
+        const id = Math.floor(Math.random() * (1011400 - 1011000) +1011000);
+        getCharater(id)
+            .then(onCharLoaded);
     }
 
     
-    componentDidMount(){
-        console.log("Mount");
-        this.updateChar();
-    }
-    componentDidUpdate(){
-        console.log("Update");
-        
-    }
-    componentWillUnmount(){
-        console.log("Unmount");
-
-    }
+    const errorMessage = error ? <ErrorMessage/> : null;
+    const spinner = loading ? <Spinner/> : null;
+    const content = !(loading || error)?<View char={char}/>: null;
 
 
-    marvelService = new MarvelService();
-
-
-
-    onCharLoaded = (char) =>{
-        this.setState({char,loading:false}) 
-    }
-    onCharLoading = () => {
-        this.setState({
-            loading: true
-        })
-    }
-
-    onError = ()=>{
-        this.setState({
-            loading:false,
-            error: true
-        })
-    }
-
-
-    updateChar = () => {
-        console.log("Erorr");
-        const id = Math.floor(Math.random() * (1011400 - 1011000) +1011000);
-        this.onCharLoading()
-        this.marvelService
-            .getCharater(id)
-            .then(this.onCharLoaded)
-            .catch(this.onError);
-    }
-
-    render(){
-        console.log("render");
-        const {char, loading, error} = this.state;
-
-        const errorMessage = error ? <ErrorMessage/> : null;
-        const spinner = loading ? <Spinner/> : null;
-        const content = !(loading || error)?<View char={char}/>: null;
-
-
-        return (
-            <div className="randomchar">
-                {errorMessage}
-                {spinner}
-                {content}
-                <div className="randomchar__static">
-                    <p className="randomchar__title">
-                        Random character for today!<br/>
-                        Do you want to get to know him better?
-                    </p>
-                    <p className="randomchar__title">
-                        Or choose another one
-                    </p>
-                    <button className="button button__main" onClick={this.updateChar} >
-                        <div className="inner">try it</div>
-                    </button>
-                    <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
-                </div>
+    return (
+        <div className="randomchar">
+            {errorMessage}
+            {spinner}
+            {content}
+            <div className="randomchar__static">
+                <p className="randomchar__title">
+                    Random character for today!<br/>
+                    Do you want to get to know him better?
+                </p>
+                <p className="randomchar__title">
+                    Or choose another one
+                </p>
+                <button className="button button__main" onClick={updateChar} >
+                    <div className="inner">try it</div>
+                </button>
+                <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
             </div>
-        )
-    }
+        </div>
+    )
 }
 
 
