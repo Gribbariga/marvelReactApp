@@ -44,13 +44,24 @@ const CharInfo = (props)=>  {
         getComicsByIdChar(charId)
             .then(onComicsLinkLoaded);
     }
+    const descrTransform = (descr, num) =>{
+
+
+        if(descr !== ""){
+            return descr.slice(0,num)+'...';
+        }
+        else{
+            return "Описания нет";
+        }
+    }
     const onCharLoaded = (char) =>{
+        char.description = descrTransform(char.description, 120);
         setChar(char);
     }
     const onComicsLinkLoaded = (comics) =>{
         setIdComics(comics);
     }
-
+    
     
     const skeleton = char || loading || error ? null : <Skeleton/>;
     const errorMessage = error ? <ErrorMessage/> : null;
@@ -100,7 +111,8 @@ const View = ({char,idComics}) =>{
                 {
                     
                     comics.length!==0?comics.map((item,i) =>{
-                        if(i<9){
+                        
+                        if(i<9 && typeof idComics[i] !== 'undefined'){
                             return(
                                 <li key={i}className="char__comics-item">
                                     <Link to={`/comics/${idComics[i].id}`}>
